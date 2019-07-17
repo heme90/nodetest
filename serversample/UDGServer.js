@@ -17,7 +17,6 @@ var server = http.createServer(function (req, res) {   //create web server
             }
             res.end(data, 'utf-8'); // 브라우저로 전송
           });
-    
     }
     else if (_url == '/mainpage.go') { //check the URL of the current request
          // set response header
