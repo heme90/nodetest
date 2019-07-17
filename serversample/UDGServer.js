@@ -20,8 +20,15 @@ var server = http.createServer(function (req, res) {   //create web server
     
     }
     else if (_url == '/mainpage.go') { //check the URL of the current request
-        res.writeHead(302, {'Location' : '/'})
-        // set response content    
+         // set response header
+         res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
+         // set response content    
+         fs.readFile(__dirname + '/index.html', (err, data) => { // 파일 읽는 메소드
+             if (err) {
+               return console.error(err); // 에러 발생시 에러 기록하고 종료
+             }
+             res.end(data, 'utf-8'); // 브라우저로 전송
+           });
     
     }
     else if (_url == '/mapsearch.go') { //check the URL of the current request
