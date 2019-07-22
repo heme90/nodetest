@@ -8,14 +8,25 @@ var util = require('util');
 // Connection URL
 const mongourl = 'mongodb://localhost:27017';
 
+
+
+
 // Database Name
 
 // Create a new MongoClient
 const client = new MongoClient(mongourl, {useNewUrlParser: true});
+let db;
+client.connect(function(err) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+  db = client.db('udg');
+
+  //여기서 테스트를 원하는 function 호출
+});
 
 var server = http.createServer(function (req, res) {   //create web server
-    var _url = req.url;
-    var qurey = url.parse(_url,true).query;
+    var _url = req.url
+    var qurey = url.parse(req.url,true).query;
     process.setMaxListeners(20);
     
     if (_url == '/') { //check the URL of the current request
@@ -23,106 +34,33 @@ var server = http.createServer(function (req, res) {   //create web server
         // set response header
         res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
         // set response content    
-        fs.readFile(__dirname + '/index.html', (err, data) => { // 파일 읽는 메소드
+        fs.readFile(__dirname + '/test.html', (err, data) => { // 파일 읽는 메소드
             if (err) {
               return console.error(err); // 에러 발생시 에러 기록하고 종료
             }
             res.end(data, 'utf-8'); // 브라우저로 전송
           });
     
+    } else if (_url.startsWith('/signup.do')) { //check the URL of the current request
+      signup(db,qurey.id,qurey.pw,qurey.email);
+      res.end("<h1>" + _url + "</h1>");
+    } else if (_url.startsWith('/signin.do')) { //check the URL of the current request
+      signin(db,qurey.id,qurey.pw);
+      res.end("<h1>" + _url + "</h1>");
+    } else if (_url.startsWith('/addmap.do')) { //check the URL of the current request
+      addmap_udg(db,qurey.id,qurey.dname,qurey.x,qurey.y,1);
+      res.end("<h1>" + _url + "</h1>");
+    } else if (_url.startsWith('/sharemap.do')) { //check the URL of the current request
+      shared(db,qurey.id,qurey.dname,qurey.x,qurey.y);
+      res.end("<h1>" + _url + "</h1>");
+    } else if (_url.startsWith('/followmap.do')) { //check the URL of the current request
+      followmap_add(db,query.id,query.c_id,query.dname,query.x,query.y);
+      res.end("<h1>" + _url + "</h1>");
+    } else if (_url.startsWith('/mapcntinc.do')) { //check the URL of the current request
+      followcnt_inc(db,qurey.id,qurey.dname,qurey.x,qurey.y);
+      res.end("<h1>" + _url + "</h1>");
     }
-    else if (_url == '/mainpage.go') { //check the URL of the current request
-        res.writeHead(302, {'Location' : '/'})
-        // set response content    
     
-    }
-    else if (_url == '/mymap.go') { //check the URL of the current request
-        
-        // set response header
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        // set response content    
-        fs.readFile(__dirname + '/mymap.html', (err, data) => { // 파일 읽는 메소드
-            if (err) {
-              return console.error(err); // 에러 발생시 에러 기록하고 종료
-            }
-            res.end(data, 'utf-8'); // 브라우저로 전송
-          });
-    
-    }
-
-    else if (_url == '/myfollowmap.go') { //check the URL of the current request
-        
-        // set response header
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        // set response content    
-        fs.readFile(__dirname + '/followingmap.html', (err, data) => { // 파일 읽는 메소드
-            if (err) {
-              return console.error(err); // 에러 발생시 에러 기록하고 종료
-            }
-            res.end(data, 'utf-8'); // 브라우저로 전송
-          });
-    
-    }
-    else if (_url== "/signup.go") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        fs.readFile(__dirname + '/signup.html', (err, data) => { // 파일 읽는 메소드
-            if (err) {
-              return console.error(err); // 에러 발생시 에러 기록하고 종료
-            }
-            res.end(data, 'utf-8'); // 브라우저로 전송
-          });
-    
-    }
-    else if (_url == "/login.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>로그인 스크립트의 코드입니다</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/signup.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>회원가입 스크립트의 코드입니다</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/makemap.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>지도 생성 스크립트</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/savemap.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>지도 저장 스크립트</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/sharemap.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>지도 공유 스크립트</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/followmap.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>지도 팔로우 스크립트</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
-    else if (_url == "/searchmap.do") {
-        
-        res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-        res.write('<html><h1>지도 검색 스크립트</h1><br/></html>','utf-8');
-        res.end();
-    
-    }
     else{
         res.end('Invalid Request!');
     }
@@ -144,13 +82,6 @@ console.log('Node.js web server at port 1337 is running..')
 
 
 // Use connect method to connect to the Server
-client.connect(function(err) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
-  const db = client.db('udg');
-
-  //여기서 테스트를 원하는 function 호출
-});
 
 //1. signin.do : find user by id, pw for login
 const signin = function(db,id,pw, callback) {
